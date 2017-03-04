@@ -21,24 +21,17 @@ namespace grip {
 */
 class GripPipeline {
 	private:
-		cv::Mat hsvThresholdOutput;
-		cv::Mat cvErodeOutput;
-		cv::Mat cvDilateOutput;
+		cv::Mat rgbThresholdOutput;
 		cv::Mat source0;
 		std::vector<std::vector<cv::Point> > findContoursOutput;
-		void hsvThreshold(cv::Mat &, double [], double [], double [], cv::Mat &);
-		void cvErode(cv::Mat &, cv::Mat &, cv::Point &, double , int , cv::Scalar &, cv::Mat &);
-		void cvDilate(cv::Mat &, cv::Mat &, cv::Point &, double , int , cv::Scalar &, cv::Mat &);
+		void rgbThreshold(cv::Mat &, double [], double [], double [], cv::Mat &);
 		void findContours(cv::Mat &, bool , std::vector<std::vector<cv::Point> > &);
 
 	public:
 		GripPipeline();
 		void process(cv::Mat source0);
 		void setsource0(cv::Mat &source0);
-
-		cv::Mat* gethsvThresholdOutput();
-		cv::Mat* getcvErodeOutput();
-		cv::Mat* getcvDilateOutput();
+		cv::Mat* getrgbThresholdOutput();
 		std::vector<std::vector<cv::Point> >* getfindContoursOutput();
 };
 

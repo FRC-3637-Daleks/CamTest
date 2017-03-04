@@ -14,34 +14,16 @@ GripPipeline::GripPipeline() {
 *
 */
 void GripPipeline::process(cv::Mat source0){
-	//Step HSV_Threshold0:
+	//Step RGB_Threshold0:
 	//input
-	cv::Mat hsvThresholdInput = source0;
-	double hsvThresholdHue[] = {0.0, 0.0};
-	double hsvThresholdSaturation[] = {0.0, 0.0};
-	double hsvThresholdValue[] = {0.0, 0.0};
-	hsvThreshold(hsvThresholdInput, hsvThresholdHue, hsvThresholdSaturation, hsvThresholdValue, this->hsvThresholdOutput);
-	//Step CV_erode0:
-	//input
-	cv::Mat cvErodeSrc = hsvThresholdOutput;
-	cv::Mat cvErodeKernel;
-	cv::Point cvErodeAnchor(-1, -1);
-	double cvErodeIterations = 3.0;  // default Double
-    int cvErodeBordertype = cv::BORDER_CONSTANT;
-	cv::Scalar cvErodeBordervalue(-1);
-	cvErode(cvErodeSrc, cvErodeKernel, cvErodeAnchor, cvErodeIterations, cvErodeBordertype, cvErodeBordervalue, this->cvErodeOutput);
-	//Step CV_dilate0:
-	//input
-	cv::Mat cvDilateSrc = cvErodeOutput;
-	cv::Mat cvDilateKernel;
-	cv::Point cvDilateAnchor(-1, -1);
-	double cvDilateIterations = 7.0;  // default Double
-    int cvDilateBordertype = cv::BORDER_CONSTANT;
-	cv::Scalar cvDilateBordervalue(-1);
-	cvDilate(cvDilateSrc, cvDilateKernel, cvDilateAnchor, cvDilateIterations, cvDilateBordertype, cvDilateBordervalue, this->cvDilateOutput);
+	cv::Mat rgbThresholdInput = source0;
+	double rgbThresholdRed[] = {0.0, 255.0};
+	double rgbThresholdGreen[] = {160, 255.0};
+	double rgbThresholdBlue[] = {0.0, 255.0};
+	rgbThreshold(rgbThresholdInput, rgbThresholdRed, rgbThresholdGreen, rgbThresholdBlue, this->rgbThresholdOutput);
 	//Step Find_Contours0:
 	//input
-	cv::Mat findContoursInput = cvDilateOutput;
+	cv::Mat findContoursInput = rgbThresholdOutput;
 	bool findContoursExternalOnly = false;  // default Boolean
 	findContours(findContoursInput, findContoursExternalOnly, this->findContoursOutput);
 }
@@ -54,25 +36,11 @@ void GripPipeline::setsource0(cv::Mat &source0){
 	source0.copyTo(this->source0);
 }
 /**
- * This method is a generated getter for the output of a HSV_Threshold.
- * @return Mat output from HSV_Threshold.
+ * This method is a generated getter for the output of a RGB_Threshold.
+ * @return Mat output from RGB_Threshold.
  */
-cv::Mat* GripPipeline::gethsvThresholdOutput(){
-	return &(this->hsvThresholdOutput);
-}
-/**
- * This method is a generated getter for the output of a CV_erode.
- * @return Mat output from CV_erode.
- */
-cv::Mat* GripPipeline::getcvErodeOutput(){
-	return &(this->cvErodeOutput);
-}
-/**
- * This method is a generated getter for the output of a CV_dilate.
- * @return Mat output from CV_dilate.
- */
-cv::Mat* GripPipeline::getcvDilateOutput(){
-	return &(this->cvDilateOutput);
+cv::Mat* GripPipeline::getrgbThresholdOutput(){
+	return &(this->rgbThresholdOutput);
 }
 /**
  * This method is a generated getter for the output of a Find_Contours.
@@ -82,45 +50,17 @@ std::vector<std::vector<cv::Point> >* GripPipeline::getfindContoursOutput(){
 	return &(this->findContoursOutput);
 }
 	/**
-	 * Segment an image based on hue, saturation, and value ranges.
+	 * Segment an image based on color ranges.
 	 *
-	 * @param input The image on which to perform the HSL threshold.
-	 * @param hue The min and max hue.
-	 * @param sat The min and max saturation.
-	 * @param val The min and max value.
+	 * @param input The image on which to perform the RGB threshold.
+	 * @param red The min and max red.
+	 * @param green The min and max green.
+	 * @param blue The min and max blue.
 	 * @param output The image in which to store the output.
 	 */
-	void GripPipeline::hsvThreshold(cv::Mat &input, double hue[], double sat[], double val[], cv::Mat &out) {
-		cv::cvtColor(input, out, cv::COLOR_BGR2HSV);
-		cv::inRange(out,cv::Scalar(hue[0], sat[0], val[0]), cv::Scalar(hue[1], sat[1], val[1]), out);
-	}
-
-	/**
-	 * Expands area of lower value in an image.
-	 * @param src the Image to erode.
-	 * @param kernel the kernel for erosion.
-	 * @param anchor the center of the kernel.
-	 * @param iterations the number of times to perform the erosion.
-	 * @param borderType pixel extrapolation method.
-	 * @param borderValue value to be used for a constant border.
-	 * @param dst Output Image.
-	 */
-	void GripPipeline::cvErode(cv::Mat &src, cv::Mat &kernel, cv::Point &anchor, double iterations, int borderType, cv::Scalar &borderValue, cv::Mat &dst) {
-		cv::erode(src, dst, kernel, anchor, (int)iterations, borderType, borderValue);
-	}
-
-	/**
-	 * Expands area of higher value in an image.
-	 * @param src the Image to dilate.
-	 * @param kernel the kernel for dilation.
-	 * @param anchor the center of the kernel.
-	 * @param iterations the number of times to perform the dilation.
-	 * @param borderType pixel extrapolation method.
-	 * @param borderValue value to be used for a constant border.
-	 * @param dst Output Image.
-	 */
-	void GripPipeline::cvDilate(cv::Mat &src, cv::Mat &kernel, cv::Point &anchor, double iterations, int borderType, cv::Scalar &borderValue, cv::Mat &dst) {
-		cv::dilate(src, dst, kernel, anchor, (int)iterations, borderType, borderValue);
+	void GripPipeline::rgbThreshold(cv::Mat &input, double red[], double green[], double blue[], cv::Mat &output) {
+		cv::cvtColor(input, output, cv::COLOR_BGR2RGB);
+		cv::inRange(output, cv::Scalar(red[0], green[0], blue[0]), cv::Scalar(red[1], green[1], blue[1]), output);
 	}
 
 	/**
