@@ -145,10 +145,7 @@ START_ROBOT_CLASS(Robot)
 
 
 
-		frc::SmartDashboard::PutNumber("Contours", dContours->size());
-		frc::SmartDashboard::PutNumber("Brightness", usbCamera0->GetBrightness());
-		frc::SmartDashboard::PutNumber("Mat output", cvSink0->GrabFrame(source));
-		frc::SmartDashboard::PutString("source", cvSink0->GetSource().GetName());
+
 
 
 	}
