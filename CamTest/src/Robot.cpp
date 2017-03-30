@@ -20,7 +20,6 @@ private:
 
 START_ROBOT_CLASS(Robot)
 	cs::UsbCamera *usbCamera0;
-	cs::MjpegServer *mjpegServer0;
 	cs::CvSink *cvSink0;
 	cs::CvSource cvSource0, cvSource1;
 	cv::Mat source;
@@ -31,15 +30,13 @@ START_ROBOT_CLASS(Robot)
 		chooser.AddObject(autoNameCustom, autoNameCustom);
 		usbCamera0  = new cs::UsbCamera("USB Camera 0", 0);
 		usbCamera0->SetResolution(320,240);
-		usbCamera0->SetBrightness(150);
+		usbCamera0->SetBrightness(45);
 		usbCamera0->SetExposureManual(.75);
 		contourArea1 = 0;
 		contourArea2 = 0;
 
 
-		mjpegServer0 = new cs::MjpegServer("serve_USB Camera 0", 1181);
 		cvSink0      = new cs::CvSink("opencv_USB Camera 0");
-		mjpegServer0->SetSource(*usbCamera0);
 		cvSink0->SetSource(*usbCamera0);
 		cvSource0 = CameraServer::GetInstance()->PutVideo("Output", 640, 480);
 		cvSource1 = CameraServer::GetInstance()->PutVideo("processed", 640, 480);
@@ -83,7 +80,6 @@ START_ROBOT_CLASS(Robot)
 
 	void TeleopPeriodic() {
 
-		double tolerance = .2;
 		//
 		std::vector<std::vector<cv::Point>> *dContours;
 		if (cvSink0->GrabFrame(source) != 0){
@@ -93,51 +89,29 @@ START_ROBOT_CLASS(Robot)
 		}
 		cv::Rect r1;
 		cv::Rect r2;
+		frc::SmartDashboard::PutNumber("Contours", dContours->size());
 
 		if (dContours->size()>1){
 			unsigned int i = 0;
+
 			while (i<dContours->size()){
 
-				if (i%2==0){
+
 					r1 = boundingRect(dContours->at(i));
 					frc::SmartDashboard::PutNumber("Area1", r1.height*r1.width);
 					frc::SmartDashboard::PutNumber("Midpoint1_Y", r1.br().y-(r1.height/2));
 					frc::SmartDashboard::PutNumber("Midpoint1_X", r1.br().x-(r1.width/2));
-					if ((std::abs((r1.height/r1.width)-(2.5)))/2.5 <= tolerance ){
-						cv::rectangle(source, r1, cv::Scalar(225,0,0), 1, 8, 0);
-					}
 
-				}
-				if (i%2==1){
-					r2 = boundingRect(dContours->at(i));
-					frc::SmartDashboard::PutNumber("Area2", r2.height*r2.width);
-					frc::SmartDashboard::PutNumber("Midpoint2_Y", r2.br().y-(r2.height/2));
-					frc::SmartDashboard::PutNumber("Midpoint2_X", r2.br().x-(r2.width/2));
-					if ((std::abs((r2.height/r2.width)-(2.5)))/2.5 <= tolerance ){
-						cv::rectangle(source, r2, cv::Scalar(225,0,0), 1, 8, 0);
-					}
-				}
+					cv::rectangle(source, r1, cv::Scalar(225,0,0), 1, 8, 0);
+
+
+
+
 				i++;
 			}
-			if(r1.br().x-(r1.width/2) + r2.br().x-(r2.width/2) / 2 > 360){
-				frc::SmartDashboard::PutString("Direction", "Go Left");
-
-			}
-			else{
-				frc::SmartDashboard::PutString("Direction", "Go Right");
 			}
 
 
-			}
-			else if(dContours->size()>0){
-				cv::Rect bb = boundingRect(dContours->at(0));
-				if(bb.br().x-(bb.width/2) > 160){
-					frc::SmartDashboard::PutString("Direction", "Go Left");
-				}
-				else{
-					frc::SmartDashboard::PutString("Direction", "Go Right");
-				}
-			}
 
 			cvSource1.PutFrame(source);
 
